@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Is AGI Here?</title>
+  <link rel="stylesheet" href="index.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+</head>
+<body>
+  <header>
+    <h1 class="glitch-text">Is AGI Here?</h1>
+    <p>Tracking job postings at major AGI labs since... well, now.</p>
+  </header>
+
+  <section id="dashboard">
+    <div class="dashboard-grid">
+      <div class="dashboard-card" id="stats-overview">
+        <h2>Overview</h2>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-value" id="total-jobs">0</span>
+            <span class="stat-label">Total Jobs</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value" id="unique-teams">0</span>
+            <span class="stat-label">Teams</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value" id="total-labs">0</span>
+            <span class="stat-label">Labs</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="dashboard-card" id="team-distribution">
+        <h2>Teams Hiring Most</h2>
+        <div class="chart-container">
+          <canvas id="teams-chart"></canvas>
+        </div>
+      </div>
+      
+      <div class="dashboard-card" id="lab-comparison">
+        <h2>Lab Comparison</h2>
+        <div class="chart-container">
+          <canvas id="labs-chart"></canvas>
+        </div>
+      </div>
+      
+      <div class="dashboard-card" id="location-heatmap">
+        <h2>Location Heatmap</h2>
+        <div id="locations-visual"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="job-filter-section">
+    <div class="filter-controls">
+      <div class="search-box">
+        <input type="text" id="job-search" placeholder="Search jobs...">
+      </div>
+      <div class="filter-dropdowns">
+        <select id="lab-filter">
+          <option value="all">All Labs</option>
+          <!-- Labs will be populated from API -->
+        </select>
+        <select id="team-filter">
+          <option value="all">All Teams</option>
+          <!-- Teams will be populated from API -->
+        </select>
+        <select id="location-filter">
+          <option value="all">All Locations</option>
+          <!-- Locations will be populated from API -->
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <section id="job-listing">
+    <h2>Job Postings <span id="job-count"></span></h2>
+    <div id="jobs-container"></div>
+  </section>
+
+  <script src="index.js"></script>
+</body>
+</html>

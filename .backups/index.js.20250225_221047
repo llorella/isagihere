@@ -1,0 +1,349 @@
+// Global state
+let jobsData = [];
+let labsConfig = [];
+let filteredJobs = [];
+let charts = {};
+
+// Initialize the application
+async function init() {
+  try {
+    // Fetch labs configuration
+    const labsResponse = await fetch('/api/labs');
+    labsConfig = await labsResponse.json();
+    
+    // Fetch all jobs
+    const jobsResponse = await fetch('/api/jobs');
+    jobsData = await jobsResponse.json();
+    filteredJobs = [...jobsData];
+    
+    // Initialize UI
+    populateFilterOptions();
+    updateStats();
+    renderJobCards();
+    initializeCharts();
+    
+    // Setup event listeners
+    setupEventListeners();
+    
+    // Add visual flair animations
+    animateElements();
+  } catch (error) {
+    console.error('Failed to initialize:', error);
+    document.body.innerHTML = `<div class="error-message">
+      <h2>Failed to load data</h2>
+      <p>Please try refreshing the page.</p>
+      <p class="error-details">${error.message}</p>
+    </div>`;
+  }
+}
+
+// Populate filter dropdowns
+function populateFilterOptions() {
+  // Populate labs filter
+  const labFilter = document.getElementById('lab-filter');
+  labsConfig.forEach(lab => {
+    const option = document.createElement('option');
+    option.value = lab.id;
+    option.textContent = lab.name;
+    labFilter.appendChild(option);
+  });
+  
+  // Populate teams filter
+  const teamFilter = document.getElementById('team-filter');
+  const uniqueTeams = [...new Set(jobsData.map(job => job.team))].sort();
+  uniqueTeams.forEach(team => {
+    const option = document.createElement('option');
+    option.value = team;
+    option.textContent = team;
+    teamFilter.appendChild(option);
+  });
+  
+  // Populate locations filter
+  const locationFilter = document.getElementById('location-filter');
+  const uniqueLocations = [...new Set(jobsData.map(job => job.location))].sort();
+  uniqueLocations.forEach(location => {
+    const option = document.createElement('option');
+    option.value = location;
+    option.textContent = location;
+    locationFilter.appendChild(option);
+  });
+}
+
+// Update stats section
+function updateStats() {
+  document.getElementById('total-jobs').textContent = jobsData.length;
+  
+  const uniqueTeams = new Set(jobsData.map(job => job.team));
+  document.getElementById('unique-teams').textContent = uniqueTeams.size;
+  
+  document.getElementById('total-labs').textContent = labsConfig.length;
+  
+  document.getElementById('job-count').textContent = `(${filteredJobs.length} of ${jobsData.length})`;
+}
+
+// Render job cards
+function renderJobCards() {
+  const container = document.getElementById('jobs-container');
+  container.innerHTML = '';
+  
+  filteredJobs.forEach(job => {
+    const labConfig = labsConfig.find(l => l.id === job.lab) || { name: job.lab, color: '#888' };
+    
+    const card = document.createElement('div');
+    card.className = 'job-card';
+    
+    // Add lab indicator
+    const labIndicator = document.createElement('div');
+    labIndicator.className = 'lab-indicator';
+    labIndicator.style.backgroundColor = labConfig.color;
+    card.appendChild(labIndicator);
+    
+    // Lab badge
+    const labBadge = document.createElement('div');
+    labBadge.className = 'lab-badge';
+    labBadge.textContent = labConfig.name;
+    labBadge.style.backgroundColor = `${labConfig.color}30`; // 30 is hex for 19% opacity
+    labBadge.style.color = labConfig.color;
+    card.appendChild(labBadge);
+    
+    // Job title
+    const title = document.createElement('h3');
+    title.textContent = job.title;
+    card.appendChild(title);
+    
+    // Job details
+    const teamDetail = document.createElement('p');
+    teamDetail.innerHTML = `<strong>Team:</strong> ${job.team}`;
+    card.appendChild(teamDetail);
+    
+    const locationDetail = document.createElement('p');
+    locationDetail.innerHTML = `<strong>Location:</strong> ${job.location}`;
+    card.appendChild(locationDetail);
+    
+    if (job.type) {
+      const typeDetail = document.createElement('p');
+      typeDetail.innerHTML = `<strong>Type:</strong> ${job.type}`;
+      card.appendChild(typeDetail);
+    }
+    
+    if (job.compensation && job.compensation !== 'Not specified') {
+      const compensationDetail = document.createElement('p');
+      compensationDetail.innerHTML = `<strong>Compensation:</strong> ${job.compensation}`;
+      card.appendChild(compensationDetail);
+    }
+    
+    container.appendChild(card);
+  });
+}
+
+// Initialize charts
+function initializeCharts() {
+  // Team distribution chart
+  const teamsCtx = document.getElementById('teams-chart').getContext('2d');
+  const teamCounts = {};
+  jobsData.forEach(job => {
+    teamCounts[job.team] = (teamCounts[job.team] || 0) + 1;
+  });
+  
+  // Sort and take top 10 teams
+  const topTeams = Object.entries(teamCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10);
+  
+  charts.teamsChart = new Chart(teamsCtx, {
+    type: 'bar',
+    data: {
+      labels: topTeams.map(t => t[0]),
+      datasets: [{
+        label: 'Jobs',
+        data: topTeams.map(t => t[1]),
+        backgroundColor: 'rgba(88, 166, 255, 0.7)',
+        borderColor: 'rgba(88, 166, 255, 1)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: 'rgba(224, 224, 255, 0.7)'
+          },
+          grid: {
+            color: 'rgba(255, 255, 255, 0.05)'
+          }
+        },
+        y: {
+          ticks: {
+            color: 'rgba(224, 224, 255, 0.7)'
+          },
+          grid: {
+            display: false
+          }
+        }
+      }
+    }
+  });
+  
+  // Lab comparison chart
+  const labsCtx = document.getElementById('labs-chart').getContext('2d');
+  const labCounts = {};
+  jobsData.forEach(job => {
+    labCounts[job.lab] = (labCounts[job.lab] || 0) + 1;
+  });
+  
+  charts.labsChart = new Chart(labsCtx, {
+    type: 'doughnut',
+    data: {
+      labels: labsConfig.map(lab => lab.name),
+      datasets: [{
+        data: labsConfig.map(lab => labCounts[lab.id] || 0),
+        backgroundColor: labsConfig.map(lab => lab.color),
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: {
+            color: 'rgba(224, 224, 255, 0.7)',
+            padding: 10
+          }
+        }
+      }
+    }
+  });
+  
+  // Location heatmap
+  renderLocationHeatmap();
+}
+
+// Create locations heatmap visualization
+function renderLocationHeatmap() {
+  const container = document.getElementById('locations-visual');
+  container.innerHTML = '';
+  
+  const locationCounts = {};
+  jobsData.forEach(job => {
+    locationCounts[job.location] = (locationCounts[job.location] || 0) + 1;
+  });
+  
+  // Sort locations by count
+  const sortedLocations = Object.entries(locationCounts)
+    .sort((a, b) => b[1] - a[1]);
+    
+  // Calculate max for scaling
+  const maxCount = sortedLocations[0][1];
+  
+  // Create D3 visualization
+  const width = container.clientWidth;
+  const height = container.clientHeight || 200;
+  
+  const svg = d3.select(container)
+    .append('svg')
+    .attr('width', width)
+    .attr('height', height);
+  
+  // Create location bubbles
+  const bubbles = svg.selectAll('circle')
+    .data(sortedLocations)
+    .enter()
+    .append('circle')
+    .attr('cx', (d, i) => 50 + (i % 5) * (width / 5))
+    .attr('cy', (d, i) => 50 + Math.floor(i / 5) * 80)
+    .attr('r', d => 5 + (d[1] / maxCount) * 30)
+    .attr('fill', (d, i) => {
+      // Gradient color based on job count
+      const ratio = d[1] / maxCount;
+      return d3.interpolateViridis(ratio);
+    })
+    .attr('stroke', '#fff')
+    .attr('stroke-width', 0.5)
+    .attr('opacity', 0.8);
+  
+  // Add location labels
+  svg.selectAll('text')
+    .data(sortedLocations)
+    .enter()
+    .append('text')
+    .attr('x', (d, i) => 50 + (i % 5) * (width / 5))
+    .attr('y', (d, i) => 50 + Math.floor(i / 5) * 80 + 30)
+    .attr('text-anchor', 'middle')
+    .attr('font-size', '9px')
+    .attr('fill', 'rgba(224, 224, 255, 0.7)')
+    .text(d => d[0].split(',')[0]); // Just show first part of location
+}
+
+// Setup event listeners
+function setupEventListeners() {
+  // Search functionality
+  document.getElementById('job-search').addEventListener('input', filterJobs);
+  
+  // Filter dropdowns
+  document.getElementById('lab-filter').addEventListener('change', filterJobs);
+  document.getElementById('team-filter').addEventListener('change', filterJobs);
+  document.getElementById('location-filter').addEventListener('change', filterJobs);
+  
+  // Resize handler for charts
+  window.addEventListener('resize', () => {
+    if (charts.teamsChart) charts.teamsChart.resize();
+    if (charts.labsChart) charts.labsChart.resize();
+    renderLocationHeatmap();
+  });
+}
+
+// Filter jobs based on search and dropdown selections
+function filterJobs() {
+  const searchTerm = document.getElementById('job-search').value.toLowerCase();
+  const selectedLab = document.getElementById('lab-filter').value;
+  const selectedTeam = document.getElementById('team-filter').value;
+  const selectedLocation = document.getElementById('location-filter').value;
+  
+  filteredJobs = jobsData.filter(job => {
+    // Apply search filter
+    const matchesSearch = 
+      searchTerm === '' || 
+      job.title.toLowerCase().includes(searchTerm) ||
+      job.team.toLowerCase().includes(searchTerm);
+    
+    // Apply dropdown filters
+    const matchesLab = selectedLab === 'all' || job.lab === selectedLab;
+    const matchesTeam = selectedTeam === 'all' || job.team === selectedTeam;
+    const matchesLocation = selectedLocation === 'all' || job.location === selectedLocation;
+    
+    return matchesSearch && matchesLab && matchesTeam && matchesLocation;
+  });
+  
+  // Update the display
+  document.getElementById('job-count').textContent = `(${filteredJobs.length} of ${jobsData.length})`;
+  renderJobCards();
+}
+
+// Add visual flair and animations
+function animateElements() {
+  // Staggered fade-in for job cards
+  const cards = document.querySelectorAll('.job-card');
+  cards.forEach((card, index) => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    
+    setTimeout(() => {
+      card.style.opacity = '1';
+      card.style.transform = 'translateY(0)';
+    }, 100 + index * 50);
+  });
+}
+
+// Start the application
+document.addEventListener('DOMContentLoaded', init);

@@ -1,0 +1,55 @@
+async function fetchJobs(lab) {
+  const response = await fetch(`/api/jobs/${lab}`);
+  const data = await response.json();
+  return lab === 'openai' ? data.data.jobBoard.jobPostings : data.departments.flatMap(d => d.jobs);
+}
+
+function renderJobs(jobs, containerId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+
+  jobs.forEach(job => {
+    const card = document.createElement('div');
+    card.className = 'job-card';
+
+    const title = document.createElement('h3');
+    title.textContent = job.title;
+    card.appendChild(title);
+
+    const location = document.createElement('p');
+    location.textContent = `Location: ${job.locationName || job.location?.name || 'Unknown'}`;
+    card.appendChild(location);
+
+    const type = document.createElement('p');
+    type.textContent = `Type: ${job.employmentType || 'Unknown'}`;
+    card.appendChild(type);
+
+    const compensation = document.createElement('p');
+    compensation.textContent = `Compensation: ${job.compensationTierSummary || 'Unknown'}`;
+    card.appendChild(compensation);
+
+    container.appendChild(card);
+  });
+}
+
+function updateStats(openaiJobs, anthropicJobs) {
+  const totalJobs = openaiJobs.length + anthropicJobs.length;
+  const uniqueTeams = new Set([
+    ...openaiJobs.map(job => job.teamId),
+    ...anthropicJobs.map(job => job.department?.name),
+  ]).size;
+
+  document.getElementById('total-jobs').textContent = totalJobs;
+  document.getElementById('unique-teams').textContent = uniqueTeams;
+}
+
+async function init() {
+  const openaiJobs = await fetchJobs('openai');
+  const anthropicJobs = await fetchJobs('anthropic');
+
+  updateStats(openaiJobs, anthropicJobs);
+  renderJobs(openaiJobs, 'openai-jobs');
+  renderJobs(anthropicJobs, 'anthropic-jobs');
+}
+
+init();

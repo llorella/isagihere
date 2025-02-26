@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Is AGI Here?</title>
+  <link rel="stylesheet" href="index.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+</head>
+<body>
+  <header>
+    <div class="logo-container">
+      <h1 class="glitch-text">Is AGI Here?</h1>
+      <div class="pulse-dot"></div>
+    </div>
+    <p>Tracking job postings at major AGI labs since... well, now.</p>
+  </header>
+
+  <div class="last-updated">
+    Last updated: <span id="update-time">Loading...</span>
+  </div>
+  
+  <section id="dashboard">
+    <div class="dashboard-grid">
+      <div class="dashboard-card" id="stats-overview">
+        <h2>Job Overview</h2>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-value" id="total-jobs">0</span>
+            <span class="stat-label">Total Jobs</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value" id="new-jobs">0</span>
+            <span class="stat-label">New (7d)</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value" id="removed-jobs">0</span>
+            <span class="stat-label">Removed (30d)</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="dashboard-card" id="job-trends">
+        <h2>Weekly Job Trends</h2>
+        <div id="trends-container">
+          <table class="trends-table">
+            <thead>
+              <tr>
+                <th>Lab</th>
+                <th>Current</th>
+                <th>vs Last Week</th>
+                <th>Change</th>
+              </tr>
+            </thead>
+            <tbody id="trends-table-body">
+              <!-- Trends data will be populated here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div class="dashboard-card" id="historical-chart">
+        <h2>Historical Job Postings</h2>
+        <div class="chart-container">
+          <canvas id="history-chart"></canvas>
+        </div>
+      </div>
+      
+      <div class="dashboard-card" id="team-distribution">
+        <h2>Top Teams Hiring</h2>
+        <div class="chart-container">
+          <canvas id="teams-chart"></canvas>
+        </div>
+      </div>
+      
+      <div class="dashboard-card" id="lab-comparison">
+        <h2>Jobs by Lab</h2>
+        <div class="chart-container">
+          <canvas id="labs-chart"></canvas>
+        </div>
+      </div>
+      
+      <div class="dashboard-card" id="location-heatmap">
+        <h2>Location Distribution</h2>
+        <div id="locations-map"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="job-filter-section">
+    <div class="filter-controls">
+      <div class="search-box">
+        <input type="text" id="job-search" placeholder="Search jobs...">
+      </div>
+      <div class="filter-dropdowns">
+        <select id="lab-filter">
+          <option value="all">All Labs</option>
+          <!-- Labs will be populated from API -->
+        </select>
+        <select id="team-filter">
+          <option value="all">All Teams</option>
+          <!-- Teams will be populated from API -->
+        </select>
+        <select id="location-filter">
+          <option value="all">All Locations</option>
+          <!-- Locations will be populated from API -->
+        </select>
+        <select id="job-status">
+          <option value="active">Active Jobs</option>
+          <option value="new">New Jobs (7d)</option>
+          <option value="removed">Recently Removed</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <section id="job-listing">
+    <h2>Job Postings <span id="job-count"></span></h2>
+    <div id="jobs-container"></div>
+  </section>
+
+  <footer>
+    <p>© <span id="current-year"></span> IsAGIHere.com - Tracking when AGI labs stop hiring humans</p>
+  </footer>
+
+  <script src="index.js"></script>
+</body>
+</html>

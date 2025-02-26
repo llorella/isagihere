@@ -1,0 +1,63 @@
+body {
+  font-family: 'Courier New', monospace;
+  background: #0d1117;
+  color: #c9d1d9;
+  margin: 0;
+  padding: 20px;
+}
+
+h1, h2 {
+  color: #58a6ff;
+}
+
+#stats {
+  margin-bottom: 40px;
+}
+
+.stats-grid {
+  display: flex;
+  gap: 20px;
+}
+
+.stat-card {
+  background: #21262d;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  flex: 1;
+}
+
+.stat-card h3 {
+  margin: 0 0 10px;
+  font-size: 1.2em;
+}
+
+.stat-card p {
+  margin: 0;
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+#job-tracker {
+  margin-top: 20px;
+}
+
+.job-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.job-card {
+  background: #21262d;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.job-card h3 {
+  margin: 0 0 10px;
+}
+
+.job-card p {
+  margin: 5px 0;
+}

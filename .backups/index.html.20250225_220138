@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Is AGI Here?</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <header>
+    <h1>Is AGI Here?</h1>
+    <p>Tracking job postings at major AGI labs since... well, now.</p>
+  </header>
+
+  <section id="stats">
+    <h2>Stats</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>Total Jobs</h3>
+        <p id="total-jobs">0</p>
+      </div>
+      <div class="stat-card">
+        <h3>Unique Teams</h3>
+        <p id="unique-teams">0</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="job-tracker">
+    <h2>Job Postings</h2>
+    <div id="openai-jobs" class="job-grid"></div>
+    <div id="anthropic-jobs" class="job-grid"></div>
+  </section>
+
+  <script src="index.js"></script>
+</body>
+</html>

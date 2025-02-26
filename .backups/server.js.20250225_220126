@@ -1,0 +1,64 @@
+import { serve } from 'bun';
+import { fetch } from 'undici';
+
+serve({
+  port: 3000,
+  async fetch(req) {
+    const url = new URL(req.url);
+
+    // Serve static files
+    if (url.pathname === '/') {
+      return new Response(Bun.file('./index.html'));
+    } else if (url.pathname === '/index.js') {
+      return new Response(Bun.file('./index.js'));
+    } else if (url.pathname === '/index.css') {
+      return new Response(Bun.file('./index.css'));
+    }
+
+    // Proxy job data requests
+    if (url.pathname === '/api/jobs/openai') {
+      const response = await fetch('https://jobs.ashbyhq.com/api/non-user-graphql?op=ApiJobBoardWithTeams', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apollographql-client-name': 'frontend_non_user',
+          'apollographql-client-version': '0.1.0',
+        },
+        body: JSON.stringify({
+          operationName: 'ApiJobBoardWithTeams',
+          variables: { organizationHostedJobsPageName: 'openai' },
+          query: `
+            query ApiJobBoardWithTeams($organizationHostedJobsPageName: String!) {
+              jobBoard: jobBoardWithTeams(organizationHostedJobsPageName: $organizationHostedJobsPageName) {
+                jobPostings {
+                  id
+                  title
+                  teamId
+                  locationName
+                  employmentType
+                  compensationTierSummary
+                }
+              }
+            }
+          `,
+        }),
+      });
+      const data = await response.json();
+      return new Response(JSON.stringify(data), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (url.pathname === '/api/jobs/anthropic') {
+      const response = await fetch('https://boards-api.greenhouse.io/v1/boards/anthropic/departments');
+      const data = await response.json();
+      return new Response(JSON.stringify(data), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    return new Response('Not found', { status: 404 });
+  },
+});
+
+console.log('Server running at http://localhost:3000');
