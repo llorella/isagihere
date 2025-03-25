@@ -1,7 +1,6 @@
-
 # Is AGI Here?
 
-AGI research labs' hiring patterns serve as a leading indicator of breakthrough progress - when they stop hiring humans, they might have something big.
+Open jobs may be a good indicator of AGI progress at top labs. We track them accordingly.
 
 ## Quick Start
 
